@@ -1,29 +1,24 @@
 classdef Mixer
     properties
-        % Properties can be added here if needed
+        name                   % Name of the mixer
+        frequencyRange         % Operating frequency range of the mixer (in GHz)
+        localOscillatorRange   % Operating frequency range of the local oscillator (in GHz)
+        intermediateFrequencyRange % Operating frequency range of the intermediate frequency (in GHz)
+        loDriveLevelRange      % Range of LO drive level (in dBm)
+        conversionLossAt10dBm % Conversion loss at LO drive level = 10 dBm (in dB)
+        conversionLossAt13dBm % Conversion loss at LO drive level = 13 dBm (in dB)
     end
     
     methods
         function obj = Mixer()
             % Constructor
-        end
-        
-        function output_signal = downconvert(obj, input_signal, LO_signal)
-            % Downconversion method
-            % input_signal: Signal to be downconverted
-            % LO_signal: Local oscillator signal
-            
-            % Perform downconversion using mixer operation
-            output_signal = input_signal .* LO_signal;
-        end
-        
-        function output_signal = upconvert(obj, input_signal, LO_signal)
-            % Upconversion method
-            % input_signal: Signal to be upconverted
-            % LO_signal: Local oscillator signal
-            
-            % Perform upconversion using mixer operation
-            output_signal = input_signal .* LO_signal;
+            obj.name = 'XM-B1H6-0404D';
+            obj.frequencyRange = [5, 12];
+            obj.localOscillatorRange = [5, 12];
+            obj.intermediateFrequencyRange = [0, 4];
+            obj.loDriveLevelRange = [7, 10];
+            obj.conversionLossAt10dBm = [9.5, 12];
+            obj.conversionLossAt13dBm = [9, 13];
         end
     end
 end
