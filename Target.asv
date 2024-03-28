@@ -1,0 +1,26 @@
+classdef Target
+    properties
+        Range                % Distance from the radar to the target (in meters)
+        Velocity             % Speed of the target (in meters per second)
+        RCS                  % Radar Cross Section of the target (in square meters)
+        Orientation          % Angle of the target relative to the radar (in degrees)
+        DopplerShift         % Doppler shift caused by the target's motion (in Hertz)
+        Shape                % Geometric shape of the target
+        MaterialProperties   % Electromagnetic properties of the target material
+        NoiseCharacteristics % Additional noise or interference introduced by the target
+    end
+    
+    methods
+        % Constructor
+        function obj = Target()
+            obj.Range = 500;  % Example value: 500 meters
+            obj.Velocity = 40;  % Example value: 40 m/s
+            obj.RCS = 10;  % Example value: 10 square meters
+            obj.Orientation = 45;  % Example value: 45 degrees
+            obj.DopplerShift = 20e3;  % Example value: 20 kHz
+            obj.Shape = 'Sphere';  % Example value: 'Sphere'
+            obj.MaterialProperties = struct('Material', 'Metal', 'DielectricConstant', 1);  % Example value: Metal with dielectric constant 2.5
+            obj.NoiseCharacteristics = 'None';  % Example value: 'None'
+        end
+    end
+end
