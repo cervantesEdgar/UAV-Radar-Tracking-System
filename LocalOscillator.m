@@ -13,13 +13,15 @@ classdef LocalOscillator
         Pulling             % Frequency pulling into a 2.0:1 VSWR (in MHz peak-to-peak)
         VccPushing_20GHz    % Vcc pushing at Vtune = +20V, F = 20 GHz (in MHz/V)
         FreqDriftRate % Frequency drift rate at 10 GHz (in MHz/°C)
+        FreqInput
     end
     
     methods
-        function obj = LocalOscillator()
+        function obj = LocalOscillator(freqInput)
             % Constructor with default values
             obj.Name = 'HMC587LC4B';         % Name
             obj.FrequencyRange = [5, 10];    % GHz
+            obj.FreqInput = freqInput;
             obj.PowerOutput = 3;             % dBm
             obj.PhaseNoise_10kHz = -65;      % dBc/Hz
             obj.PhaseNoise_100kHz = -95;     % dBc/Hz
@@ -32,5 +34,15 @@ classdef LocalOscillator
             obj.VccPushing_20GHz = -15;      % MHz/V
             obj.FreqDriftRate = 0.8; % MHz/°C
         end
+        function checkFrequency(obj)
+        if obj.FreqInput < obj.FrequencyRange(1)
+        disp('The frequency is too low.');
+        elseif obj.FreqInput > obj.FrequencyRange(2)
+        disp('The frequency is too high.');
+        else
+        disp('yes');
+        end
+end
+
     end
 end

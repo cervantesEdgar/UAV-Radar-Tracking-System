@@ -42,5 +42,16 @@ classdef Amplifier
                 nf = 7; % Noise figure for frequency range 3
             end
         end
+        function amplifiedWaveform = amplify(obj, waveform, desiredGain)
+            % Amplify the input waveform with the desired gain
+            if desiredGain < min(obj.gain) || desiredGain > max(obj.gain)
+                error(['Desired gain must be within the specified gain range: ' num2str(obj.gain(1)) ' dB to ' num2str(obj.gain(end)) ' dB.']);
+            end
+            % Implement amplification process here
+            % You would apply the desired gain to the waveform
+            amplifiedWaveform = desiredGain * waveform;
+        end
+
+
     end
 end
