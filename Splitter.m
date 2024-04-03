@@ -94,6 +94,25 @@ classdef Splitter
             ylabel('Return Loss (dB)');
             title('Frequency Response - Return Loss');
         end
+        function splitWaveform = splitWaveform(obj, inputWaveform, numOutputs, powerSplitRatio)
+            % Split the input waveform based on specified parameters
+            % inputWaveform: Input waveform from the local oscillator (VCO)
+            % numOutputs: Number of output ports
+            % powerSplitRatio: Power split ratio for each output port
 
+            % Check if the number of output ports matches the length of power split ratio
+            if numel(powerSplitRatio) ~= numOutputs
+                error('Number of power split ratios must match the number of output ports.');
+            end
+
+            % Normalize power split ratio to ensure it sums to 1
+            powerSplitRatio = powerSplitRatio / sum(powerSplitRatio);
+
+            % Split the input waveform based on power split ratio
+            splitWaveform = cell(1, numOutputs);
+            for i = 1:numOutputs
+                splitWaveform{i} = inputWaveform * sqrt(powerSplitRatio(i));
+            end
+        end
     end
 end
