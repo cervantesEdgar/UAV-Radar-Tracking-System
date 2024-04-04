@@ -17,7 +17,7 @@ classdef USRPN210
             obj.originalCarrierFrequency = 1e6;   % 1 MHz
             obj.originalPhase = 0;                % 0 radians
             obj.originalAmplitude = 1;            % Amplitude of 1
-            obj.originalSamplingFrequency = 10e6; % 10 MS/s
+            obj.originalSamplingFrequency = 1.01e6; % 10 MS/s
             obj.originalDuration = 1e-3;          % 1 millisecond
         end
         

@@ -2,7 +2,7 @@ close all;
 clear, clc
 
 % Create an instance of the Splitter class with a specific usedFreq value
-split = Splitter(26.5);
+split = Splitter(5);
 
 % Call the setUsedProperties method directly on the object
 

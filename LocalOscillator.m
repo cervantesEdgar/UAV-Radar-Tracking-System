@@ -15,7 +15,7 @@ classdef LocalOscillator
         FreqDriftRate % Frequency drift rate at 10 GHz (in MHz/°C)
         FreqInput
     end
-    
+
     methods
         function obj = LocalOscillator(freqInput)
             % Constructor with default values
@@ -33,16 +33,19 @@ classdef LocalOscillator
             obj.Pulling = 4;                % MHz pp
             obj.VccPushing_20GHz = -15;      % MHz/V
             obj.FreqDriftRate = 0.8; % MHz/°C
+
+            obj.checkFrequency();
         end
         function checkFrequency(obj)
-        if obj.FreqInput < obj.FrequencyRange(1)
-        disp('The frequency is too low.');
-        elseif obj.FreqInput > obj.FrequencyRange(2)
-        disp('The frequency is too high.');
-        else
-        disp('yes');
+            if obj.FreqInput < obj.FrequencyRange(1)
+                error('The frequency is too low.');
+            elseif obj.FreqInput > obj.FrequencyRange(2)
+                error('The frequency is too high.');
+            end
         end
-end
-
+        function waveform = createWaveform(obj)
+            t = linspace(0, 1, 1000); % Time vector from 0 to 1 second with 1000 samples
+            waveform = sin(2*pi*obj.FreqInput*t); % Sinusoidal waveform with frequency of 10 MHz
+        end
     end
 end
