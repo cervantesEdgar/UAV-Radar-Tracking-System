@@ -1,58 +1,58 @@
-clear,clc,close
-% Define parameters
-Fs = 1000; % Sampling frequency (Hz)
-T = 1; % Duration of signal (s)
-t = 0:1/Fs:T-1/Fs; % Time vector
+close; clear; clc;
+fs = 500; %Sampling Frequency (Hz)
+duration = 0.65; %Duration (Seconds)
 
-% Generate low-amplitude background signal
-background_signal = 0.1 * randn(size(t)); % Low-amplitude random noise
+N = fs*duration; %Total number of samples
+t = 0:1/fs:duration-1/fs; % Time Vector
 
-% Generate echoes for the two objects at different ranges
-range1 = 50; % Range of object 1 (m)
-range2 = 100; % Range of object 2 (m)
+a1 = 3; f1 = 30; phi1 = 0.6;
+a2 = 2; f2 = 45; phi2 = -0.8;
+a3 = 1; f3 = 70; phi3 = 2;
 
-% Generate echoes for the two objects
-echo1 = exp(-(t - 2*range1/(3e8)).^2 / (2*(1/(3e8))^2)); % Gaussian pulse for object 1
-echo2 = exp(-(t - 2*range2/(3e8)).^2 / (2*(1/(3e8))^2)); % Gaussian pulse for object 2
+s1 = a1*cos(2*pi*f1*t + phi1);
+s2 = a2*cos(2*pi*f2*t + phi2);
+s3 = a3*cos(2*pi*f3*t + phi3);
 
-% Combine the echoes with the background to simulate radar data
-signal = background_signal + echo1 + echo2;
+s = s1 + s2 + s3;
 
-% Plot the simulated radar data
-figure;
-plot(t, signal);
-title('Simulated Radar Data');
-xlabel('Time (s)');
+figure
+plot(t,s)
+xlabel('Time (seconds)');
 ylabel('Amplitude');
+title('Time Domain Plot')
 
-% Perform FFT to convert signal to frequency domain
-fft_signal = fft(signal);
-frequencies = fftshift((-length(signal)/2:length(signal)/2-1)*(Fs/length(signal)));
+s = s.*hamming(N)';
+figure
+plot(s)
+xlabel('Samples');
+ylabel('Amplitude');
+title('Signal After Windowing')
 
-% Plot FFT of radar signal
-figure;
-plot(frequencies, abs(fft_signal));
-title('FFT of Radar Data');
-xlabel('Frequency (Hz)');
+s = [s zeros(1,2000)];
+
+N2 = length(s);
+figure
+plot(s);
+xlabel('Samples');
+ylabel('Amplitude');
+title('Signal After Zero Padding')
+
+S = fft(s);
+figure
+plot(abs(S))
+xlabel('Samples');
 ylabel('Magnitude');
+title('Frequency Domain Plot')
 
-% Find peaks corresponding to object ranges
-[~, peak_locs] = findpeaks(abs(fft_signal)); % Find all peaks
+S_OneSide = S(1:N2/2);
+f = fs*(0:N2/2-1)/N2;
+S_meg = abs(S_OneSide)/(N/4);
+figure
+plot(f,S_meg)
+xlabel('Frequenzy (Hz)');
+ylabel('Amplitude');
+title('Frequency Domain Plot')
 
-if ~isempty(peak_locs) % Check if peaks are found
-    % Extract peak frequencies
-    peak_frequencies = frequencies(peak_locs);
-
-    % Calculate ranges of the objects
-    speed_of_light = 3e8; % Speed of light (m/s)
-    range_objects = speed_of_light ./ (2 * peak_frequencies);
-
-    % Plot the ranges of the objects
-    figure;
-    stem(1:numel(range_objects), range_objects, 'filled');
-    title('Ranges of Detected Objects');
-    xlabel('Object Index');
-    ylabel('Range (m)');
-else
-    disp('No peaks detected in the FFT signal.');
-end
+phase1 = angle(S_OneSide(f1*duration+1))
+phase2 = angle(S_OneSide(f2*duration+1))
+phase3 = angle(S_OneSide(f3*duration+1))
