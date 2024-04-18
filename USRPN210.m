@@ -14,7 +14,7 @@ classdef USRPN210
         function obj = USRPN210()
             % Constructor (optional)
             % Set example values for the properties
-            obj.originalCarrierFrequency = 1e6;   % 1 MHz
+            obj.originalCarrierFrequency = 1000000;   % 1 MHz
             obj.originalPhase = 0;                % 0 radians
             obj.originalAmplitude = 1;            % Amplitude of 1
             obj.originalSamplingFrequency = 1.01e6; % 10 MS/s
@@ -31,24 +31,27 @@ classdef USRPN210
             waveform = obj.originalAmplitude * sin(2*pi*obj.originalCarrierFrequency*t + obj.originalPhase);
         end
         
-        function receiveWaveform(obj, receivedWaveform)
-            % Compare received waveform with the original generated waveform
-            originalWaveform = obj.generateWaveform();
-            
-            % Time vector for plotting
-            t = linspace(0, obj.originalDuration, numel(receivedWaveform));
-            
-            % Plot both waveforms
-            plot(t, originalWaveform, 'b', 'LineWidth', 1.5);  % Original waveform
-            hold on;
-            plot(t, receivedWaveform, 'r', 'LineWidth', 1.5);  % Received waveform
-            hold off;
-            
-            % Add labels and legend
-            xlabel('Time (s)');
-            ylabel('Amplitude');
-            title('Original and Received Waveforms');
-            legend('Original', 'Received');
-        end
+        function receiveWaveform(obj, receivedWaveform, dopplerShift, rangeInfo)
+    % Apply Doppler shift to the received waveform
+
+    % Time vector for plotting
+    t = linspace(0, obj.originalDuration, numel(receivedWaveform));
+
+    % Plot both waveforms
+    plot(t, obj.generateWaveform(), 'b', 'LineWidth', 1.5);  % Original waveform
+    hold on;
+    plot(t, receivedWaveform, 'r', 'LineWidth', 1.5);  % Received waveform with Doppler effect
+    hold off;
+
+    % Add labels and legend
+    xlabel('Time (s)');
+    ylabel('Amplitude');
+    title('Original and Received Waveforms');
+    legend('Original', 'Received with Doppler effect');
+
+    % Display target range information
+    disp(rangeInfo);
+end
+
     end
 end

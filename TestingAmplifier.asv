@@ -1,2 +1,0 @@
-amplifier1 = Amplifier(5);
-aplifer1.amplify();

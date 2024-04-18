@@ -1,30 +1,58 @@
+clear,clc,close
 % Define parameters
-carrierFrequency = 1e6;     % Carrier frequency of the sinusoidal waveform (1 MHz)
-samplingFrequency = 1.00001e6;   % Sampling frequency (10 MS/s)
-duration = 0.5;             % Duration of the waveform (100 ms)
-amplitude = 1;              % Amplitude of the sinusoidal waveform
+Fs = 1000; % Sampling frequency (Hz)
+T = 1; % Duration of signal (s)
+t = 0:1/Fs:T-1/Fs; % Time vector
 
-% Time vector
-t = linspace(0, duration, samplingFrequency * duration);
+% Generate low-amplitude background signal
+background_signal = 0.1 * randn(size(t)); % Low-amplitude random noise
 
-% Generate transmitted sinusoidal waveform
-transmittedWaveform = amplitude * sin(2*pi*carrierFrequency*t);
+% Generate echoes for the two objects at different ranges
+range1 = 50; % Range of object 1 (m)
+range2 = 100; % Range of object 2 (m)
 
-% Simulate channel effects or noise (for demonstration)
-% For simplicity, let's add Gaussian noise to the transmitted waveform
-noisePower = 0.1; % Adjust noise power as needed
-receivedWaveform = transmittedWaveform + sqrt(noisePower) * randn(size(t));
+% Generate echoes for the two objects
+echo1 = exp(-(t - 2*range1/(3e8)).^2 / (2*(1/(3e8))^2)); % Gaussian pulse for object 1
+echo2 = exp(-(t - 2*range2/(3e8)).^2 / (2*(1/(3e8))^2)); % Gaussian pulse for object 2
 
-% Plot transmitted waveform
-subplot(2, 1, 1);
-plot(t, transmittedWaveform, 'b', 'LineWidth', 1.5);  % Transmitted waveform
+% Combine the echoes with the background to simulate radar data
+signal = background_signal + echo1 + echo2;
+
+% Plot the simulated radar data
+figure;
+plot(t, signal);
+title('Simulated Radar Data');
 xlabel('Time (s)');
 ylabel('Amplitude');
-title('Transmitted Waveform');
 
-% Plot received waveform
-subplot(2, 1, 2);
-plot(t, receivedWaveform, 'r', 'LineWidth', 1.5);  % Received waveform
-xlabel('Time (s)');
-ylabel('Amplitude');
-title('Received Waveform');
+% Perform FFT to convert signal to frequency domain
+fft_signal = fft(signal);
+frequencies = fftshift((-length(signal)/2:length(signal)/2-1)*(Fs/length(signal)));
+
+% Plot FFT of radar signal
+figure;
+plot(frequencies, abs(fft_signal));
+title('FFT of Radar Data');
+xlabel('Frequency (Hz)');
+ylabel('Magnitude');
+
+% Find peaks corresponding to object ranges
+[~, peak_locs] = findpeaks(abs(fft_signal)); % Find all peaks
+
+if ~isempty(peak_locs) % Check if peaks are found
+    % Extract peak frequencies
+    peak_frequencies = frequencies(peak_locs);
+
+    % Calculate ranges of the objects
+    speed_of_light = 3e8; % Speed of light (m/s)
+    range_objects = speed_of_light ./ (2 * peak_frequencies);
+
+    % Plot the ranges of the objects
+    figure;
+    stem(1:numel(range_objects), range_objects, 'filled');
+    title('Ranges of Detected Objects');
+    xlabel('Object Index');
+    ylabel('Range (m)');
+else
+    disp('No peaks detected in the FFT signal.');
+end
