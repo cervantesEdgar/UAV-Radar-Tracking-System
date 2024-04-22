@@ -15,43 +15,51 @@ s3 = a3*cos(2*pi*f3*t + phi3);
 
 s = s1 + s2 + s3;
 
-figure
-plot(t,s)
-xlabel('Time (seconds)');
-ylabel('Amplitude');
-title('Time Domain Plot')
 
-s = s.*hamming(N)';
-figure
-plot(s)
-xlabel('Samples');
-ylabel('Amplitude');
-title('Signal After Windowing')
+    % Create a single figure
+    figure
 
-s = [s zeros(1,2000)];
+    % Plot 1: Time Domain Plot
+    subplot(3,2,1)
+    plot(t,s)
+    xlabel('Time (seconds)');
+    ylabel('Amplitude');
+    title('Time Domain Plot')
 
-N2 = length(s);
-figure
-plot(s);
-xlabel('Samples');
-ylabel('Amplitude');
-title('Signal After Zero Padding')
+    % Plot 2: Signal After Windowing
+    s_windowed = s.*hamming(length(s))'; % assuming N is defined somewhere
+    subplot(3,2,2)
+    plot(s_windowed)
+    xlabel('Samples');
+    ylabel('Amplitude');
+    title('Signal After Windowing')
 
-S = fft(s);
-figure
-plot(abs(S))
-xlabel('Samples');
-ylabel('Magnitude');
-title('Frequency Domain Plot')
+    % Plot 3: Signal After Zero Padding
+    s_padded = [s_windowed zeros(1,2000)];
+    subplot(3,2,3)
+    plot(s_padded);
+    xlabel('Samples');
+    ylabel('Amplitude');
+    title('Signal After Zero Padding')
 
-S_OneSide = S(1:N2/2);
-f = fs*(0:N2/2-1)/N2;
-S_meg = abs(S_OneSide)/(N/4);
-figure
-plot(f,S_meg)
-xlabel('Frequenzy (Hz)');
-ylabel('Amplitude');
-title('Frequency Domain Plot')
+    % Plot 4: Frequency Domain Plot
+    S = fft(s_padded);
+    subplot(3,2,4)
+    plot(abs(S))
+    xlabel('Samples');
+    ylabel('Magnitude');
+    title('Frequency Domain Plot')
+
+    % Plot 5: Frequency Domain Plot (Zoomed)
+    S_OneSide = S(1:length(S)/2);
+    f = fs*(0:length(S)/2-1)/length(S);
+    S_meg = abs(S_OneSide)/(length(s)/4);
+    subplot(3,2,[5,6])
+    plot(f,S_meg)
+    xlabel('Frequency (Hz)');
+    ylabel('Amplitude');
+    title('Frequency Domain Plot (Zoomed)')
+
 
 phase1 = angle(S_OneSide(f1*duration+1))
 phase2 = angle(S_OneSide(f2*duration+1))
