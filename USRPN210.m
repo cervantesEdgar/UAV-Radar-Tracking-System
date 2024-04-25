@@ -46,7 +46,7 @@ classdef USRPN210
             title('Time Domain Plot')
         
             % Plot 2: Signal After Windowing
-            s_windowed = s.*hamming(length(s))'; % assuming N is defined somewhere
+            s_windowed = s.*hamming(length(s))';
             subplot(3,2,2)
             plot(s_windowed)
             xlabel('Samples');
