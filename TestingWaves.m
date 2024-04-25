@@ -61,6 +61,6 @@ s = s1 + s2 + s3;
     title('Frequency Domain Plot (Zoomed)')
 
 
-phase1 = angle(S_OneSide(f1*duration+1))
-phase2 = angle(S_OneSide(f2*duration+1))
-phase3 = angle(S_OneSide(f3*duration+1))
+phase1 = angle(S_OneSide(f1*duration+1));
+phase2 = angle(S_OneSide(f2*duration+1));
+phase3 = angle(S_OneSide(f3*duration+1));
