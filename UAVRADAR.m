@@ -9,6 +9,8 @@ waveform = usrp.generateWaveform();
 gain1 = 5;  % Initial gain level
 amplifier1 = Amplifier(gain1);
 amplified_waveform = amplifier1.applyGain(waveform);
-
+% Go Through Mixer
+% Transmit Through Antenna
 % Hit Target
-% This is the actual circuit simulation.
+% Return to Receiving Antenna
+% 
