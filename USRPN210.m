@@ -14,16 +14,16 @@ classdef USRPN210
         function obj = USRPN210()
             % Constructor (optional)
             % Set example values for the properties
-            obj.originalCarrierFrequency = 1000000;   % 1 MHz
+            obj.originalCarrierFrequency = 1e9;   % 1 HHz
             obj.originalPhase = 0;                % 0 radians
-            obj.originalAmplitude = 1;            % Amplitude of 1
-            obj.originalSamplingFrequency = 1.01e6; % 10 MS/s
+            obj.originalAmplitude = 1;            % Amplitude of 1 
+            obj.originalSamplingFrequency = 25e6; % 10 MS/s
             obj.originalDuration = 1e-3;          % 1 millisecond
         end
         
         function waveform = generateWaveform(obj)
             % Generate waveform using the USRP N210
-            
+             
             % Time vector
             t = linspace(0, obj.originalDuration, obj.originalSamplingFrequency * obj.originalDuration);
             

@@ -1,6 +1,6 @@
 % Parameters
 Fs = 1000;          % Sampling frequency (Hz)
-f0 = 10;            % Center frequency of radar signal (Hz)
+f0 = 600;            % Center frequency of radar signal (Hz)
 T = 1;              % Duration of signal (s)
 t = 0:1/Fs:T-1/Fs;  % Time vector
 
