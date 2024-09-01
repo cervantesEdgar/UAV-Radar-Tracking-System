@@ -54,22 +54,43 @@ fprintf('Calculated Distance: %.2f meters\n', distance);
 figure;
 
 % Original Transmitted Signal
-subplot(3,1,1);
+subplot(3,2,1);
 plot(t, x);
 xlabel('Time (s)');
 ylabel('Amplitude');
 title('Transmitted Signal');
 
 % Received Signal with Delay and Noise
-subplot(3,1,2);
+subplot(3,2,2);
 plot(t, x_received);
 xlabel('Time (s)');
 ylabel('Amplitude');
 title('Received Signal with Delay and Noise');
 
 % Frequency Spectrum of the Transmitted Signal
-subplot(3,1,3);
+subplot(3,2,3);
 plot(frequencies, X_mag);
 xlabel('Frequency (Hz)');
 ylabel('Magnitude');
 title('Magnitude Spectrum of the Transmitted Signal');
+
+subplot(3,2,4)
+spectrogram(x_received, 256, 250, 256, fs, 'yaxis');
+title('Spectrogram of Received Signal');
+colorbar;
+
+subplot(3,2,5)
+psd = abs(X_received).^2 / length(x_received);
+plot(frequencies, 10*log10(psd(1:n/2+1)));
+xlabel('Frequency (Hz)');
+ylabel('Power/Frequency (dB/Hz)');
+title('Power Spectral Density of Received Signal');
+
+subplot(3,2,6)
+[cfs, frequencies] = cwt(x_received, fs);
+surf(t, frequencies, abs(cfs), 'EdgeColor', 'none');
+axis tight;
+view(0, 90);
+title('Wavelet Transform of Receivedz Signal');
+xlabel('Time (s)');
+ylabel('Frequency (Hz)');
