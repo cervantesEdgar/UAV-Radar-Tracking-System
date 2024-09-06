@@ -14,7 +14,7 @@ classdef SignalProcessing
             ylabel('Amplitude');
             title('Transmitted Signal');
             grid on;
-            
+            %
             % Plot the spectrogram
             subplot(4, 1, 2);
             spectrogram(transmittedSignal, 256, 250, 256, samplingRate, 'yaxis');

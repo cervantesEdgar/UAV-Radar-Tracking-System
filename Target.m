@@ -11,6 +11,7 @@ classdef Target
             obj.distance = distance;
             obj.velocity = velocity;
             obj.rcs = rcs;
+            %Add extra properties
         end
     end
 end
