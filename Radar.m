@@ -11,7 +11,7 @@ classdef Radar
         noiseFigure = 3;           % Noise figure in dB (example value)
         systemLoss = 6;            % System loss in dB (example value)
         rcs = 1;                   % Radar cross-section (example value)
-        numSamples = 1e6;
+        numSamples = 1e6;          % Number of Samples For Time Vector
     end
     
     methods

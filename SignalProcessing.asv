@@ -7,7 +7,7 @@ classdef SignalProcessing
             t = (0:length(transmittedSignal)-1) / samplingRate;
             
             % Plot the transmitted signal
-            figure Name 'Signal Processing'; 
+            figure Name 'Signal Processing';
             subplot(4, 1, 1);
             plot(t, transmittedSignal);
             xlabel('Time (s)');
