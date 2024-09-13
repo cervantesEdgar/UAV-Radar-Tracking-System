@@ -1,5 +1,5 @@
 classdef system_params
-
+    
     properties
         CenterFrequency = 10E9;
         NoiseFigureStages;
@@ -12,7 +12,7 @@ classdef system_params
         Bandwidth;
         Pavg;
     end
-
+    
     methods
         function obj = system_params(vargin)
             %SYSTEM_PARAMS Can be overwritten through vargin
@@ -27,18 +27,6 @@ classdef system_params
                         obj.RCS_dB = vargin{i+1};
                     case 'Attenuation'
                         obj.Attenuation = vargin{i+1};
-                    case 'SpeedOfLight'
-                        obj.SpeedOfLight = vargin{i+1};
-                    case 'K'
-                        obj.K = vargin{i+1};
-                    case 'To'
-                        obj.To = vargin{i+1};
-                    case 'Bandwidth'
-                        obj.Bandwidth = vargin{i+1};
-                    case 'Pavg'
-                        obj.Pavg = vargin{i+1};
-                    otherwise
-                        error('Unknown parameter: %s', vargin{i});
                 end
             end
             obj.NoiseFigureStages = [];
@@ -47,10 +35,10 @@ classdef system_params
             % Add a new component's noise figure and gain to the stages
             % componentNoiseFigure: Noise figure of the component in linear terms
             % componentGain: Gain of the component in linear terms
-
+            
             % Create a new row with the component's noise figure and gain
             newStage = [componentNoiseFigure_linear, componentGain_linear];
-
+            
             % Append the new stage to the existing NoiseFigureStages
             obj.NoiseFigureStages = [obj.NoiseFigureStages; newStage];
             % Display the added noise figure and gain
@@ -66,31 +54,23 @@ classdef system_params
             % 5, 100;  NF1 = 5, G1 = 100
             % 10, 31.62  NF2 = 10, G2 = 31.62
             % ];
-
+            % Ensure the stages input is a matrix with two columns
             % Check if there are any stages to process
             if isempty(obj.NoiseFigureStages)
                 error('No noise figure stages to calculate.');
             end
-
+            
             % Initialize total noise figure calculation
             noiseFigure = obj.NoiseFigureStages(1, 1); % NF of the first stage
-            disp(['Starting with first stage: NF = ', num2str(noiseFigure), ' (linear), G = ', num2str(obj.NoiseFigureStages(1, 2))]);
-
+            
             % Iterate over the remaining stages
             for i = 2:size(obj.NoiseFigureStages, 1)
                 NF_i = obj.NoiseFigureStages(i, 1);
                 G_prev = prod(obj.NoiseFigureStages(1:i-1, 2)); % Product of gains of all previous stages
-
+                
                 % Apply the Friis formula for noise figure
-                noiseFigure = noiseFigure + (NF_i - 1) / G_prev;
-
-                % Display feedback for each stage
-                disp(['Stage ', num2str(i), ': NF = ', num2str(NF_i), ' (linear), G = ', num2str(obj.NoiseFigureStages(i, 2))]);
-                disp(['Cumulative noise figure after stage ', num2str(i), ': ', num2str(noiseFigure)]);
+                noiseFigure_linear = noiseFigure + (NF_i - 1) / G_prev;
             end
-
-            noiseFigure_linear = noiseFigure; % Assign the final calculated noise figure
-            disp(['Total noise figure (linear): ', num2str(noiseFigure_linear)]);
         end
 
         function Rmax = calculateRMax(obj, transmitGain, receivingGain)
@@ -111,7 +91,7 @@ classdef system_params
             % Miscellaneous system losses
             Ls_dB = 6; % (dB)
             Ls = 10^(Ls_dB/10); % convert to linear
-
+            
             % Noise figure
             Fn_dB = calculateTotalNoiseFigure(); % (dB)
             Fn = 10^(Fn_dB/10); % convert to linear
