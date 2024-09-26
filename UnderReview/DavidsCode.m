@@ -31,7 +31,7 @@ clc, clear, close
 % Constants
 giga = 10^9;
 milli = 10^-3;
-micro = 10^-6;%
+micro = 10^-6;
 nano = 10^-9;
 % Set up of time vector used for plotting
 start_point = 0;

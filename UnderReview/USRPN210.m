@@ -31,7 +31,7 @@ classdef USRPN210
             waveform = obj.originalAmplitude * sin(2*pi*obj.originalCarrierFrequency*t + obj.originalPhase);
         end
         
-        function receiveWaveform(obj, receivedWaveform)
+        function receiveWaveform(receivedWaveform)
             s = receivedWaveform;
             t = (0:length(s)-1)/fs; % assuming fs is defined somewhere
         
