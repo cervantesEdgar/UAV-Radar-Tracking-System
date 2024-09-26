@@ -1,47 +1,60 @@
-% Parameters
-Fs = 1000;          % Sampling frequency (Hz)
-f0 = 600;            % Center frequency of radar signal (Hz)
-T = 1;              % Duration of signal (s)
-t = 0:1/Fs:T-1/Fs;  % Time vector
+clear; close all; clc;
 
-% Generate input signal (Radar pulse)
-x = cos(2*pi*f0*t);
+% Radar parameters
+samplingRate = 25e6;  % Sampling rate: 25 MHz
+sweepTime = 1e-3;     % Sweep time: 1 ms
+frequency = 4.4e9;    % Center frequency: 4.4 GHz
+bandwidth = 25e6;     % Bandwidth: 25 MHz
+numSamples = samplingRate * sweepTime; % Total number of samples
 
-% Simulate target (Adding some delay and attenuation)
-delay = 0.1;        % Delay in seconds
-attenuation = 0.5;  % Attenuation factor
-target_response = [zeros(1, round(delay*Fs)), x(1:end-round(delay*Fs))] * attenuation;
+% Create a time vector
+t = (0:numSamples-1) / samplingRate;  % Time vector for one sweep
 
-% Add noise (optional)
-noise_power = 0.1;
-noise = sqrt(noise_power) * randn(size(x));
+% Generate a test signal: a chirp (up-sweep)
+testSignal = chirp(t, frequency - bandwidth/2, sweepTime, frequency + bandwidth/2);
 
-% Combine input signal with target response
-received_signal = x + target_response + noise;
+% Plot the transmitted signal
+figure('Name', 'Signal Processing');
 
-% Plot input and received signals
-figure;
-subplot(3,1,1);
-plot(t, x);
-title('Input Radar Signal');
-
-subplot(3,1,2);
-plot(t, target_response);
-title('Simulated Target Response');
-
-subplot(3,1,3);
-plot(t, received_signal);
-title('Received Signal');
-
-% Analyze frequency and amplitude
-received_fft = fft(received_signal);
-frequencies = linspace(0, Fs, length(received_fft));
-
-figure;
-plot(frequencies, abs(received_fft));
-title('Frequency Spectrum of Received Signal');
-xlabel('Frequency (Hz)');
+% Time-domain plot
+subplot(3, 1, 1);
+plot(t, testSignal);
+xlabel('Time (s)');
 ylabel('Amplitude');
+title('Transmitted Signal');
+grid on;
 
-% Analyze range
-% (Add range analysis code here)
+% Plot the spectrogram
+subplot(3, 1, 2);
+[S, F, T] = spectrogram(testSignal, 512, 256, 512, samplingRate, 'yaxis');
+F = F / 1e9;  % Convert frequency to GHz
+imagesc(T, F, 10*log10(abs(S)));  % Convert to dB
+axis xy;  % Correct the axis orientation
+colorbar;  % Add color bar
+ylim([min(F), max(F)]);  % Set y-axis limits based on actual frequency range
+title('Spectrogram of the Transmitted Signal');
+ylabel('Frequency (GHz)');
+
+waterfall(F,T,abs(S)'.^2)
+set(gca,XDir="reverse",View=[30 50])
+xlabel("Frequency (Hz)")
+ylabel("Time (s)")
+
+% Perform the FFT
+fftSignal = fft(testSignal);
+
+% Frequency axis for FFT
+N = length(fftSignal);  % Length of the signal
+freq = (-N/2:N/2-1) * (samplingRate / N) + frequency;  % Shift by center frequency
+
+% Shift the FFT to center zero frequency
+fftShifted = fftshift(fftSignal);
+
+% Create a plot for FFT
+subplot(3, 1, 3);
+plot(freq/1e9, abs(fftShifted));  % Convert frequency to GHz for plotting
+xlim([4.3875 4.4125]);  % Set x-axis limits to GHz
+xlabel('Frequency (GHz)');
+ylabel('Magnitude');
+title('FFT of the Transmitted Signal');
+grid on;

@@ -42,4 +42,10 @@ SignalProcessorSpecs = struct( ...
     'WindowFunction', 'hann' ...       % Windowing function to reduce spectral leakage
 );
 
+USRPSpecs = struct( ...
+    'FFTLength', 1024, ...             % Length of the FFT for range processing
+    'WindowFunction', 'hann' ...       % Windowing function to reduce spectral leakage
+);
+
+
 % You can add other components such as filters, delay lines, etc.

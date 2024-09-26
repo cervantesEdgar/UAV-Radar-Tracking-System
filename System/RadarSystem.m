@@ -1,4 +1,6 @@
-%USRP creates signal
+% Step 1: USRP creates signal
+usrp = USRP();
+usrpSignal = usrp.GenerateSignal();
 
 %VCO creates signal
 %Amplifier amplifies signal of VCO
@@ -8,6 +10,7 @@
 
 %USRP Signal passes to Mixer
 %Signal A from splitter also passes to mixer
+mixer = Mixer();
 
 %Create target
 %Receive signal from target
