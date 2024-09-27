@@ -1,9 +1,7 @@
 classdef SignalProcessing
     methods (Static)
-        function processSignal(transmittedSignal, samplingRate, centerFrequency)
+        function processSignal(transmittedSignal, samplingRate)
             % Method to process and plot the transmitted signal
-            %clc, close;
-
             % Create a time vector
             t = (0:length(transmittedSignal)-1) / samplingRate;
 
@@ -20,9 +18,11 @@ classdef SignalProcessing
             subplot(3, 1, 2);
             spectrogram(transmittedSignal, 256, 250, 256, samplingRate, 'yaxis');
             title('Spectrogram of the Transmitted Signal');
-            %ylabel('Frequency (GHz)');
 
-            %ylim([4.3875e9 4.4125e9]);  % Set y-axis limits to actual frequency range
+            % Calculate and display the center frequency and power
+            [centerFrequency, powerDBm] = SignalProcessing.getSignalCharacteristics(transmittedSignal, samplingRate);
+            disp(['Center Frequency: ', num2str(centerFrequency), ' Hz']);
+            disp(['Signal Power: ', num2str(powerDBm), ' dBm']);
 
             % Perform the FFT
             fftSignal = fft(transmittedSignal);
@@ -37,15 +37,33 @@ classdef SignalProcessing
             % Create a plot
             subplot(3, 1, 3);
             plot(freq/1e9, abs(fftShifted));  % Convert frequency to GHz for plotting
-
-            % Adjust the axes and labels
-            %xlim([4.3875 4.4125]);  % Set x-axis limits to GHz
             xlabel('Frequency (GHz)');
             ylabel('Magnitude');
             title('FFT of the Transmitted Signal');
             grid on;
         end
 
+        function [centerFrequency, powerDBm] = getSignalCharacteristics(signalName,signal, samplingRate)
+            % Calculate the power of the signal
+            power = mean(signal.^2);  % Mean square of the signal
+            powerDBm = 10 * log10(power * 1000);  % Convert to dBm
+
+            % Calculate the FFT of the signal to find the frequency components
+            fftSignal = fft(signal);
+            N = length(fftSignal);
+            f = (0:N-1) * (samplingRate / N);  % Frequency vector
+
+            % Get the magnitude of the FFT
+            magnitude = abs(fftSignal);
+            [~, maxIndex] = max(magnitude);  % Find index of the maximum magnitude
+            centerFrequency = f(maxIndex);  % Center frequency (Hz)
+
+            % Display the center frequency and power
+            disp(['Signal: ', signalName]);
+            disp(['Center Frequency: ', num2str(centerFrequency), ' Hz']);
+            disp(['Signal Power: ', num2str(powerDBm), ' dBm']);
+            disp(['']);
+        end
 
         function [range, velocity] = processReceivedSignal(receivedSignal)
             % Method to process the received signal to extract range and velocity

@@ -44,10 +44,12 @@ classdef USRP
             end
         end
 
-        function USRPGeneratedSignal = GenerateSignal(obj)
+        function USRPGeneratedSignal = GenerateSignal(obj,t)
             % Generate FMCW radar signal with up-sweep and reset (no down-sweep)
 
-            t = (0:obj.numSamples-1) / obj.samplingRate;        % Time vector
+            %t = (0:obj.numSamples-1) / obj.samplingRate;        % Time vector
+            %Time Step 1/25e6 = 40ns
+            %Total Duration: 0.04 seconds (40 ms)
             samplesPerSweep = obj.samplingRate * obj.sweepTime;  % Samples per sweep
             numSweeps = floor(length(t) / samplesPerSweep);      % Number of complete sweeps
             totalSamples = numSweeps * samplesPerSweep;          % Total samples generated
@@ -71,21 +73,6 @@ classdef USRP
 
             % Return only the required number of samples
             USRPGeneratedSignal = transmittedSignal(1:obj.numSamples);
-        end
-
-        function USRPGeneratedSignal = USRPGenerateOneSampleSignal(obj)
-            % Generate a signal with one up-sweep followed by one down-sweep
-            t = (0:obj.samplingRate * obj.sweepTime - 1) / obj.samplingRate; % Time vector for one sweep
-
-            % Create the up-sweep
-            upSweep = chirp(t, ...
-                obj.frequency - obj.bandwidth/2, ...
-                obj.sweepTime, ...
-                obj.frequency + obj.bandwidth/2);
-            % Concatenate the up-sweep and down-sweep
-            %USRPGeneratedSignal = [upSweep, downSweep];
-
-            USRPGeneratedSignal = upSweep;
         end
     end
 end
