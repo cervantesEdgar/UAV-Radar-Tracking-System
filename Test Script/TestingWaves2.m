@@ -10,8 +10,8 @@ fc = 10e9;  % Carrier frequency (10 GHz)
 BW = 25e6;  % Bandwidth (25 MHz)
 
 % Target parameters (moving and stationary)
-targetRanges = [1000, 10000, 10000];  % Target ranges in meters
-targetVelocities = [1, 0, -1]; % Target velocities in m/s (2nd target is stationary)
+targetRanges = [5, 50, 100];  % Target ranges in meters
+targetVelocities = [10, 0, 5]; % Target velocities in m/s (2nd target is stationary)
 
 % Time and Range Calculation
 t = (0:1/Fs:T-1/Fs);  % Time vector for one pulse
