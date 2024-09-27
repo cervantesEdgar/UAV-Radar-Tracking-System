@@ -1,41 +1,33 @@
-% Basic Radar Signal Simulation
-clc
-close all;
-clear all;
+% Main Script or Function
 
-% Number of samples
-N = 1e6;
+% Create a time vector
+samplingRate = 25e6;  % Sampling rate
+numSamples = 1e6;      % Number of samples
+t = (0:numSamples-1) / samplingRate;  % Time vector
 
-% Parameters for the transmitted signal
-fc = 1E9; % Carrier frequency (Hz)
-Fs = 2.5E7; % Sampling frequency (Hz)
-A = 1; % Amplitude of the signal
+% Step 1: Generate signal from USRP
+usrp = USRP();  % Create an instance of the USRP class
+usrpSignal = usrp.GenerateSignal(t);  % Generate the chirp signal
 
-% Time vector
-t = (0:N-1)/Fs;
+% Step 2: Create Mixer instance
+mixer = Mixer(4.4e9, 1, 10, 0);  % Initialize the Mixer with appropriate parameters
 
-% Generate transmitted signal (1 GHz sine wave)
-transmitted_signal = A * sin(2 * pi * fc * t);
+% Step 3: Upconvert the USRP chirp signal
+RF_signal = mixer.upconvert(usrpSignal, t);  % Upconvert the USRP signal using the mixer
 
-% Read the received signal from the file
-fid = fopen("C:\Users\edgar.cervantes\OneDrive - Vallarta Food Enterprises, Inc\Documents\MATLAB\UAV Radar\UAV-Radar-Tracking-System\test8.dat","r");
-data = fread(fid,[N/2,2],'int16'); % Read 1e6 samples
-fclose(fid);
+% Step 4: (Continue with other steps as needed)
+% You can proceed to implement additional steps such as mixing with other signals, downconversion, etc.
 
-% Convert the read data to a complex signal
-received_signal = reshape(data,2,[])' * [1; 1i];
-
-% Plot the transmitted signal
+% Optional: Plot the signals
 figure;
-subplot(2,1,1);
-plot(t(1:1000) * 1E6, transmitted_signal(1:1000)); % Plot a small portion for clarity
-title('Transmitted Signal (1 GHz Sine Wave)');
-xlabel('Time (microseconds)');
+subplot(2, 1, 1);
+plot(t, usrpSignal);
+title('USRP Generated Chirp Signal');
+xlabel('Time (s)');
 ylabel('Amplitude');
 
-% Plot the received signal
-subplot(2,1,2);
-plot(t(1:1000) * 1E6, real(received_signal(1:1000))); % Plot real part for comparison
-title('Received Signal');
-xlabel('Time (microseconds)');
+subplot(2, 1, 2);
+plot(t, RF_signal);
+title('Upconverted RF Signal');
+xlabel('Time (s)');
 ylabel('Amplitude');
