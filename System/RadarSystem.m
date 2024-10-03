@@ -12,6 +12,8 @@ usrp = USRP();
 usrpSignal = usrp.GenerateSignal(t);
 [usrpFreq, usrpPower] = signalProccessing.getSignalCharacteristics('USRP Signal', usrpSignal,samplingRate);
 
+% Add code to transmit
+
 % VCO creates signal
 vco = VCO();
 vcoSignal = vco.createSignal();
@@ -56,5 +58,7 @@ ylabel('Amplitude');
 % Received signal goes through low Noise Amplifier
 % New signal goes into mixer
 % Signal B from splitter goes into mixer
+
+% Add code to receive data
 
 % Send final signal to Plot Results Class
