@@ -7,7 +7,8 @@ classdef USRP
         sweepTime = 1e-3;          % Sweep time 1 ms
         transmitPower = 1;         % Transmit power in watts (example value)
         antennaGain = 30;          % Antenna gain in dB (example value)
-        samplingRate = 25e6;       % Sampling rate 25 MHz
+        %samplingRate = 25e6;       % Sampling rate 25 MHz
+        samplingRate = 9e9
         systemTemperature = 290;   % System temperature in Kelvin
         noiseFigure = 3;           % Noise figure in dB (example value)
         systemLoss = 6;            % System loss in dB (example value)
@@ -73,6 +74,15 @@ classdef USRP
 
             % Return only the required number of samples
             USRPGeneratedSignal = transmittedSignal(1:obj.numSamples);
+        end
+        function sineWave = generateSineWave(obj)
+            % Generates a sine wave based on the USRP properties
+            
+            % Create time vector
+            t = (0:obj.numSamples-1) / obj.samplingRate; % Time vector (seconds)
+            
+            % Generate sine wave
+            sineWave = sin(2 * pi * obj.frequency * t);
         end
     end
 end

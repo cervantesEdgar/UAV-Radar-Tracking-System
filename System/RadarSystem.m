@@ -1,16 +1,14 @@
-clc,close
-% Setup Global Time Vector
-samplingRate = 25e6;  % Sampling rate (25 MHz)
-numSamples = 1e6;  % Number of samples (1 million)
-t = (0:numSamples-1) / samplingRate;
+clc,close,clear
 
 %Signal Processing Setup
 signalProccessing = SignalProcessing();
 
 % Step 1: USRP creates signal
 usrp = USRP();
-usrpSignal = usrp.GenerateSignal(t);
-[usrpFreq, usrpPower] = signalProccessing.getSignalCharacteristics('USRP Signal', usrpSignal,samplingRate);
+usrpSignal = usrp.generateSineWave();
+[usrpFreq, usrpPower] = signalProccessing.getSignalCharacteristics('USRP Signal', usrpSignal,usrp.samplingRate);
+
+signalProccessing.processSignal(usrpSignal,usrp.samplingRate);
 
 % Add code to transmit
 
@@ -27,30 +25,9 @@ vcoSignal = vco.createSignal();
 mixer = Mixer();
 
 % Upconvert USRP signal with the test cosine signal
-mixedSignalA = mixer.upconvert(usrpSignal, test_cosine_signal);
+%mixedSignalA = mixer.upconvert(usrpSignal, test_cosine_signal);
 
 % Plotting the signals
-figure;
-% Plot USRP signal 
-subplot(3, 1, 1);
-plot(t, usrpSignal);
-title('USRP Generated Signal');
-xlabel('Time (s)');
-ylabel('Amplitude');
-
-% Plot test cosine signal 
-subplot(3, 1, 2);
-plot(t, test_cosine_signal);
-title('5.5 GHz Test Cosine Signal');
-xlabel('Time (s)');
-ylabel('Amplitude');
-
-% Plot mixed signal A 
-subplot(3, 1, 3);
-plot(t, mixedSignalA);
-title('Mixed Signal A');
-xlabel('Time (s)');
-ylabel('Amplitude');
 
 % Create target
 % Receive signal from target
