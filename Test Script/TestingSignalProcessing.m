@@ -1,8 +1,9 @@
+
+
+%% Radar Specifications 
 clear;
 close;
 clc;
-
-%% Radar Specifications 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%
 % Frequency of operation = 77GHz
 % Max Range = 200m
@@ -21,7 +22,7 @@ c = 3e8;
 % remains contant
 %  initial range:max value of 200m and velocity: [-70 to + 70 m/s]
 target_range = 110;
-target_velocity = -20; 
+target_velocity = 60; 
  
 %% FMCW Waveform Generation
 
@@ -35,7 +36,7 @@ slope = B/Tchirp;
 disp(slope);
 
 %Operating carrier frequency of Radar 
-fc= 77e9;             %carrier freq
+fc= 10e9;             %carrier freq
                                                           
 %The number of chirps in one sequence. Its ideal to have 2^ value for the ease of running the FFT
 %for Doppler Estimation. 
@@ -110,8 +111,8 @@ plot(sig_fft1, "LineWidth",2);
 grid on;
 axis ([0 200 0 0.5]);
 xlabel('range');
-ylabel('FFT output');
-title('1D FFT');
+%ylabel('FFT output');
+title('Range Plot');
 
 
 
@@ -148,7 +149,7 @@ figure,surf(doppler_axis,range_axis,RDM);
 xlabel('doppler');
 ylabel('range');
 zlabel('RDM');
-title('2D FFT');
+title('Range Doppler Map');
 
 
 %% CFAR implementation
@@ -166,7 +167,7 @@ Gr = 4;
 Gd = 2;
 % *%TODO* :
 % offset the threshold by SNR value in dB 
-offset = 1.4
+offset = 1.4;
 % *%TODO* :
 %Create a vector to store noise_level for each iteration on training cells
 noise_level = zeros(1,1);
@@ -241,3 +242,4 @@ figure('Name', 'CFAR')
 surf(doppler_axis,range_axis,RDM);
 colorbar;
 title('offset 1.4');
+
