@@ -7,7 +7,7 @@ TransmitterAntennaSpecs = struct( ...
     'Power', 1, ...                    % Transmit power in Watts
     'Bandwidth', 200e6, ...            % Bandwidth of the chirp signal in Hz
     'ChirpDuration', 1e-3, ...         % Duration of the chirp signal in seconds (1 ms)
-    'AntennaGain', 30 ...              % Gain of the transmitting antenna in dB
+    'AntennaGain', 31 ...              % Gain of the transmitting antenna in dB
 );
 
 % Receiver specifications
