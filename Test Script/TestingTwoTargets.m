@@ -17,11 +17,11 @@ c = 3e8;
 %% User Defined Range and Velocity of targets
 % Target 1
 target_range1 = 110; 
-target_velocity1 = 60; 
+target_velocity1 = 10; 
 
 % Target 2
 target_range2 = 150;  % Add the second target's initial range
-target_velocity2 = -50;  % Add the second target's velocity
+target_velocity2 = 10;  % Add the second target's velocity
  
 %% FMCW Waveform Generation
 
