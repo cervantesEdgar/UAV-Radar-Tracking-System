@@ -21,8 +21,8 @@ c = 3e8;
 % define the target's initial position and velocity. Note : Velocity
 % remains contant
 %  initial range:max value of 200m and velocity: [-70 to + 70 m/s]
-target_range = 110;
-target_velocity = 60; 
+target_range = 3;
+target_velocity = 0; 
  
 %% FMCW Waveform Generation
 

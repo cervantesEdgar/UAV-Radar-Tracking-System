@@ -1,75 +1,123 @@
-% Parameters
-Fs = 1e6;  % Sampling frequency (1 MHz)
-T = 1e-3;  % Pulse duration (1 ms)
-PRT = 1e-3;  % Pulse Repetition Time (1 ms)
-numPulses = 100;  % Number of pulses
-c = 3e8;  % Speed of light (m/s)
+%% Radar Specifications 
+clear;
+close;
+clc;
 
-% Radar signal parameters
-fc = 10e9;  % Carrier frequency (10 GHz)
-BW = 25e6;  % Bandwidth (25 MHz)
+max_range = 200;
+range_resolution = 1;
+max_velocity = 70;
+c = 3e8;  % Speed of light
 
-% Target parameters (moving and stationary)
-targetRanges = [5, 50, 100];  % Target ranges in meters
-targetVelocities = [10, 0, 5]; % Target velocities in m/s (2nd target is stationary)
+%% User Defined Target Parameters (Fan Properties)
+target_range = 3;      % Distance from radar to the fan center (meters)
+r_fan = 0.5;           % Radius of the fan blades (meters)
+omega = 30;            % Angular velocity of fan (radians/second)
+num_blades = 3;        % Number of blades on the fan
 
-% Time and Range Calculation
-t = (0:1/Fs:T-1/Fs);  % Time vector for one pulse
-rangeMax = c * T / 2; % Max unambiguous range
-rangeBins = linspace(0, rangeMax, length(t)); % Range bins
+%% FMCW Waveform Generation
+B = c /(2*range_resolution);
+Tchirp= (5.5*2*max_range)/c;
+slope = B/Tchirp;
 
-% Initialize signal matrix (range-time signal matrix)
-rti_no_clutter_rejection = zeros(numPulses, length(t));
-rti_with_clutter_rejection = zeros(numPulses, length(t));
+fc = 10e9;  % Carrier frequency
 
-% Loop over pulses to simulate moving targets
-for pulseIdx = 1:numPulses
-    % Initialize pulse for this time
-    pulseSignal = zeros(1, length(t));
-    
-    % Simulate each target
-    for targetIdx = 1:length(targetRanges)
-        % Target range based on velocity (simple constant velocity model)
-        targetRange = targetRanges(targetIdx) + targetVelocities(targetIdx) * (pulseIdx * PRT);
+Nd = 128;  % Number of doppler cells
+Nr = 1024; % Number of range cells
+
+t = linspace(0, Nd * Tchirp, Nr * Nd); % Total time for samples
+
+Tx = zeros(1, length(t)); % Transmitted signal
+Rx = zeros(1, length(t)); % Received signal
+Mix = zeros(1, length(t)); % Beat signal
+
+%% Signal Generation and Fan Blade Simulation
+for i = 1:length(t)
+    % Calculate position and Doppler shift for each fan blade
+    Rx_sum = 0;  % Initialize received signal sum from each blade
+
+    for blade = 1:num_blades
+        % Angular position of each blade (blades are evenly spaced)
+        angle = omega * t(i) + (blade - 1) * 2 * pi / num_blades;
         
-        % Round-trip delay
-        delay = 2 * targetRange / c;
+        % Radial velocity of the blade (projected along the line of sight)
+        radial_velocity = omega * r_fan * cos(angle);  
         
-        % If the target is within the pulse duration, simulate the return
-        if delay < T
-            % Find the sample index for this delay
-            delaySample = round(delay * Fs);
-            
-            % Add return signal (simulated as cosine wave)
-            pulseSignal = pulseSignal + cos(2 * pi * fc * (t - delay)) .* exp(-((t - delay) / (T / 4)).^2);
-        end
+        % Instantaneous range from radar to each blade
+        blade_range = target_range + r_fan * sin(angle);
+        time_delay = 2 * blade_range / c;
+
+        % Update transmitted and received signals for each blade
+        Tx(i) = cos(2 * pi * (fc * t(i) + (slope * t(i)^2) / 2));
+        Rx_blade = cos(2 * pi * (fc * (t(i) - time_delay) + ...
+                   (slope * (t(i) - time_delay)^2) / 2 - ...
+                   radial_velocity * t(i) * fc / c));
+        
+        Rx_sum = Rx_sum + Rx_blade;  % Summing contributions from each blade
     end
-    
-    % Add clutter (stationary targets)
-    clutterSignal = 0.3 * cos(2 * pi * fc * t); % Clutter with lower amplitude
-    
-    % Combine pulse signal and clutter
-    rti_no_clutter_rejection(pulseIdx, :) = pulseSignal + clutterSignal;
-    
-    % Apply 2-pulse canceller for clutter rejection
-    if pulseIdx > 1
-        rti_with_clutter_rejection(pulseIdx, :) = rti_no_clutter_rejection(pulseIdx, :) - rti_no_clutter_rejection(pulseIdx - 1, :);
+
+    Rx(i) = Rx_sum;  % Total received signal is the sum of all blades' signals
+    Mix(i) = Tx(i) .* Rx(i);  % Beat signal (mixed transmitted and received signals)
+end
+
+%% RANGE MEASUREMENT
+sig = reshape(Mix, [Nr, Nd]);
+sig_fft1 = fft(sig, Nr);
+sig_fft1 = abs(sig_fft1 ./ Nr); % Normalize
+sig_fft1 = sig_fft1(1:(Nr / 2)); % Single-sided spectrum
+
+figure('Name', 'Range from First FFT');
+plot(sig_fft1, "LineWidth", 2);
+grid on;
+axis([0 200 0 0.5]);
+xlabel('Range (m)');
+title('Range Plot');
+
+%% RANGE DOPPLER RESPONSE
+Mix = reshape(Mix, [Nr, Nd]);
+sig_fft2 = fft2(Mix, Nr, Nd);
+sig_fft2 = fftshift(sig_fft2(1:Nr / 2, 1:Nd));
+RDM = abs(sig_fft2);
+RDM = 10 * log10(RDM);
+
+doppler_axis = linspace(-100, 100, Nd);
+range_axis = linspace(-200, 200, Nr / 2) * ((Nr / 2) / 400);
+figure, surf(doppler_axis, range_axis, RDM);
+xlabel('Doppler (m/s)');
+ylabel('Range (m)');
+zlabel('Amplitude (dB)');
+title('Range Doppler Map with Fan Simulation');
+
+%% CFAR Implementation
+Tr = 8;
+Td = 4;
+Gr = 4;
+Gd = 2;
+offset = 1.4;
+
+RDM = RDM / max(max(RDM));
+for i = Tr + Gr + 1 : Nr/2 - (Gr + Tr)
+    for j = Td + Gd + 1 : Nd - (Gd + Td)
+        noise_level = zeros(1, 1);
+        for p = i - (Tr + Gr) : i + (Tr + Gr)
+            for q = j - (Td + Gd) : j + (Td + Gd)
+                if (abs(i - p) > Gr || abs(j - q) > Gd)
+                    noise_level = noise_level + db2pow(RDM(p, q));
+                end
+            end
+        end
+        threshold = pow2db(noise_level / (2 * (Td + Gd + 1) * 2 * (Tr + Gr + 1) - (Gr * Gd) - 1));
+        threshold = threshold + offset;
+        CUT = RDM(i, j);
+        if CUT < threshold
+            RDM(i, j) = 0;
+        else
+            RDM(i, j) = 1;
+        end
     end
 end
 
-% Plot RTI without clutter rejection
-figure;
-subplot(2, 1, 1);
-imagesc(rangeBins, (1:numPulses) * PRT, abs(rti_no_clutter_rejection));
-xlabel('Range (m)');
-ylabel('Time (s)');
-title('RTI Without Clutter Rejection');
+RDM(RDM ~= 0 & RDM ~= 1) = 0;
+figure('Name', 'CFAR');
+surf(doppler_axis, range_axis, RDM);
 colorbar;
-
-% Plot RTI with 2-pulse canceller clutter rejection
-subplot(2, 1, 2);
-imagesc(rangeBins, (1:numPulses) * PRT, abs(rti_with_clutter_rejection));
-xlabel('Range (m)');
-ylabel('Time (s)');
-title('RTI With Clutter Rejection (2-Pulse Canceller)');
-colorbar;
+title('CFAR with Fan Blades Detection');
