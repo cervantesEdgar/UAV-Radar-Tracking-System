@@ -1,25 +1,23 @@
 % MATLAB script to read a .dat file and plot the wave, including 1D FFT, regular FFT, and 2D FFT visualization
-close,clear,clc
+close all; clear; clc;
+
 % Specify the filename
 filename = 'metalplate_6_ft_2_ft_FMCW.dat';
 
-% Open the file for reading in binary mode
+% Open the file and check for errors
 fid = fopen(filename, 'r');
-
 if fid == -1
     error('Failed to open the file.');
 end
 
-% Read data as complex IQ samples
-data = fread(fid, [2, inf], 'int16'); % Read pairs of float values (I and Q values)
-data = data(1, :) + 1i * data(2, :);   % Combine into complex numbers (I + jQ)
-
-% Close the file
+% Read data as complex IQ samples directly
+data = fread(fid, 'int16=>double'); % Convert directly to double for better performance with complex
 fclose(fid);
+data = data(1:2:end) + 1i * data(2:2:end); % Create complex IQ samples
 
-% Assuming the data consists of complex IQ samples
+% Set parameters
 num_samples = length(data);
-sampling_rate = 25e6; % Replace this with the correct sampling rate if known
+sampling_rate = 25e6; % Replace with correct sampling rate if known
 time = (0:num_samples-1) / sampling_rate;
 
 % Plotting the wave (real part for visualization)
@@ -31,16 +29,17 @@ ylabel('Amplitude');
 grid on;
 legend('Waveform');
 
-%% Dynamic calculation for Nr and Nd based on data length
-Nr = 1024; % Number of range cells (can be adjusted as needed)
-Nd = floor(num_samples / Nr); % Calculate Nd based on the length of data to fit the data size
+% FFT settings based on data length
+Nr = 1024; % Number of range cells (adjust as needed)
+Nd = floor(num_samples / Nr); % Calculate Nd based on the data length
 
-% Reshape data to form a matrix for 1D FFT
+% Reshape data for 1D FFT and 2D FFT
 Mix = reshape(data(1:Nr*Nd), [Nr, Nd]);
 sig = Mix(:, 1); % Use the first chirp for range measurement
 
-sig_fft1 = fft(sig, Nr);
-sig_fft1 = abs(sig_fft1(1:Nr/2)); % Take only one side of the FFT
+% 1D FFT (Range Measurement)
+sig_fft1 = abs(fft(sig, Nr));
+sig_fft1 = sig_fft1(1:Nr/2); % Take only one side of the FFT
 
 figure('Name', '1D FFT Plot (Range Measurement)');
 plot(sig_fft1, 'LineWidth', 2);
@@ -50,11 +49,10 @@ ylabel('Amplitude');
 title('1D FFT of the Waveform (Range Measurement)');
 legend('FFT Amplitude');
 
-%% Regular FFT Plot
+% Regular FFT Plot
 N = length(data);
-data_fft = fft(data, N);
-data_fft = abs(data_fft(1:N/2)); % Take only one side of the FFT
-f = (0:N/2-1) * (sampling_rate / N); % Frequency vector
+data_fft = abs(fftshift(fft(data, N)));
+f = (-N/2:N/2-1) * (sampling_rate / N); % Frequency vector centered at 0
 
 figure('Name', 'Regular FFT Plot');
 plot(f, data_fft, 'LineWidth', 2);
@@ -64,21 +62,16 @@ ylabel('Amplitude');
 title('Regular FFT of the Waveform');
 legend('FFT Amplitude');
 
-%% 2D FFT Plot (Range-Doppler Map)
-% Reshape data to form a matrix for 2D FFT
-Mix = reshape(data(1:Nr*Nd), [Nr, Nd]);
-
-% Perform 2D FFT
-sig_fft2 = fft2(Mix, Nr, Nd);
-sig_fft2 = fftshift(sig_fft2(1:Nr/2, 1:Nd)); % Take only one side and shift zero frequency component to center
-RDM = abs(sig_fft2);
-RDM = 10*log10(RDM);
+% 2D FFT (Range-Doppler Map)
+sig_fft2 = abs(fftshift(fft2(Mix, Nr, Nd)));
+RDM = 10*log10(sig_fft2(1:Nr/2, :)); % Range-Doppler Map in dB
 
 % Plot 2D FFT (Range-Doppler Map)
 doppler_axis = linspace(-100, 100, Nd);
 range_axis = linspace(-200, 200, Nr/2) * ((Nr/2) / 400);
+
 figure('Name', 'Range Doppler Map');
-surf(doppler_axis, range_axis, RDM);
+surf(doppler_axis, range_axis, RDM, 'EdgeColor', 'none');
 xlabel('Doppler (m/s)');
 ylabel('Range (m)');
 zlabel('Amplitude (dB)');
