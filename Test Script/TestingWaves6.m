@@ -92,22 +92,4 @@ doppler_axis = linspace(-sampling_rate / 2, sampling_rate / 2, Nd);
 subplot(3,2,5);
 plot(doppler_axis, doppler_spectrum(1, :), 'LineWidth', 2); % Taking one range bin for Doppler shift
 title('Doppler Shift');
-xlabel('Doppler Frequency (Hz)');
-ylabel('Amplitude (dB)');
-grid on;
-
-% 6. Range Plot
-range_fft = fft(Mix(:, 1), Nr); % FFT along range axis for first chirp
-range_spectrum = abs(range_fft(1:Nr/2));
-
-range_axis = (0:Nr/2-1) * (sampling_rate / Nr);
-
-subplot(3,2,6);
-plot(range_axis, range_spectrum, 'LineWidth', 2);
-title('Range Plot');
-xlabel('Range (m)');
-ylabel('Amplitude');
-grid on;
-
-% Display all subplots in one figure
-sgtitle('Comprehensive FMCW Analysis');
+xlabel('Dop
