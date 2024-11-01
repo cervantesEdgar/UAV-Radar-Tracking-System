@@ -2,7 +2,7 @@
 close all; clear; clc;
 
 % Specify the filename
-filename = 'metalplate_6_ft_2_ft_FMCW.dat';
+filename = 'Last_big_metalplate_far_FMCW.dat';
 
 % Open the file and check for errors
 fid = fopen(filename, 'r');

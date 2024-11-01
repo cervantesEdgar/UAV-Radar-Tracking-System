@@ -1,7 +1,7 @@
 % MATLAB script to read a .dat file and plot the wave, including 1D FFT, regular FFT, and 2D FFT visualization
 close,clear,clc
 % Specify the filename
-filename = 'metalplate_6_ft_2_ft_FMCW.dat';
+filename = 'Last_big_metalplate_far_FMCW.dat';
 
 % Open the file for reading in binary mode
 fid = fopen(filename, 'r');
