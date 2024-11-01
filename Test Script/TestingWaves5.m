@@ -76,4 +76,4 @@ xlabel('Doppler (m/s)');
 ylabel('Range (m)');
 zlabel('Amplitude (dB)');
 title('Range Doppler Map');
-colorba
+colorbar;
