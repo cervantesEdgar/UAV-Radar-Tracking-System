@@ -1,86 +1,72 @@
-% MATLAB script to read a .dat file and plot the wave, including 1D FFT, regular FFT, and 2D FFT visualization
-close,clear,clc
+close all; clear; clc;
+
 % Specify the filename
-filename = 'Last_big_metalplate_far_FMCW.dat';
+filename = 'Last_big_metalplate_far_FMCW!.dat';
 
 % Open the file for reading in binary mode
 fid = fopen(filename, 'r');
-
 if fid == -1
     error('Failed to open the file.');
 end
 
 % Read data as complex IQ samples
-data = fread(fid, [2, inf], 'int16'); % Read pairs of float values (I and Q values)
+data = fread(fid, [2, inf], 'float32'); % Adjust to 'int16' or other if needed
 data = data(1, :) + 1i * data(2, :);   % Combine into complex numbers (I + jQ)
-
-% Close the file
 fclose(fid);
 
-% Assuming the data consists of complex IQ samples
+% Sampling rate and time
+sampling_rate = 25e6; % Adjust to actual rate if known
 num_samples = length(data);
-sampling_rate = 25e6; % Replace this with the correct sampling rate if known
 time = (0:num_samples-1) / sampling_rate;
 
-% Plotting the wave (real part for visualization)
-figure('Name','Wave Plot');
-plot(time, real(data), 'b-', 'LineWidth', 2);
-title('Wave Plot');
+% Radar parameters (adjust BW based on actual bandwidth)
+Nr = 1024; % Suggested number of range cells
+Nd = floor(num_samples / Nr); % Doppler bins (number of chirps)
+BW = 300e6; % Example bandwidth in Hz, adjust to your actual bandwidth
+c = 3e8; % Speed of light
+range_res = c / (2 * 12.5e6); % Range resolution
+max_range = 25; % Set maximum range to 25 meters
+range_idx_limit = find((0:Nr/2 - 1) * range_res >= max_range, 1); % Index up to 25 m range
+
+% Reshape data for RTI processing
+Mix = reshape(data(1:Nr*Nd), [Nr, Nd]);
+
+%% RTI Plot Without Clutter Rejection
+% Perform FFT on each pulse along range dimension
+RTI = fft(Mix, Nr, 1);
+RTI = abs(RTI(1:Nr/2, :)); % Take only positive frequencies
+RTI_dB = 10 * log10(RTI); % Convert to dB
+
+% Limit range axis to 25 meters
+range_bins = (0:Nr/2 - 1) * range_res;
+range_axis = range_bins(1:range_idx_limit); % Range up to 25 m
+RTI_dB = RTI_dB(1:range_idx_limit, :); % Limit RTI to 25 m range
+
+% Plot RTI without clutter rejection
+figure('Name', 'RTI without Clutter Rejection');
+imagesc(time, range_axis, RTI_dB, [-80, 0]); % Adjust dB range as needed
 xlabel('Time (s)');
-ylabel('Amplitude');
-grid on;
-legend('Waveform');
-
-%% Dynamic calculation for Nr and Nd based on data length
-Nr = 1024; % Number of range cells (can be adjusted as needed)
-Nd = floor(num_samples / Nr); % Calculate Nd based on the length of data to fit the data size
-
-% Reshape data to form a matrix for 1D FFT
-Mix = reshape(data(1:Nr*Nd), [Nr, Nd]);
-sig = Mix(:, 1); % Use the first chirp for range measurement
-
-sig_fft1 = fft(sig, Nr);
-sig_fft1 = abs(sig_fft1(1:Nr/2)); % Take only one side of the FFT
-
-figure('Name', '1D FFT Plot (Range Measurement)');
-plot(sig_fft1, 'LineWidth', 2);
-grid on;
-xlabel('Range Bins');
-ylabel('Amplitude');
-title('1D FFT of the Waveform (Range Measurement)');
-legend('FFT Amplitude');
-
-%% Regular FFT Plot
-N = length(data);
-data_fft = fft(data, N);
-data_fft = abs(data_fft(1:N/2)); % Take only one side of the FFT
-f = (0:N/2-1) * (sampling_rate / N); % Frequency vector
-
-figure('Name', 'Regular FFT Plot');
-plot(f, data_fft, 'LineWidth', 2);
-grid on;
-xlabel('Frequency (Hz)');
-ylabel('Amplitude');
-title('Regular FFT of the Waveform');
-legend('FFT Amplitude');
-
-%% 2D FFT Plot (Range-Doppler Map)
-% Reshape data to form a matrix for 2D FFT
-Mix = reshape(data(1:Nr*Nd), [Nr, Nd]);
-
-% Perform 2D FFT
-sig_fft2 = fft2(Mix, Nr, Nd);
-sig_fft2 = fftshift(sig_fft2(1:Nr/2, 1:Nd)); % Take only one side and shift zero frequency component to center
-RDM = abs(sig_fft2);
-RDM = 10*log10(RDM);
-
-% Plot 2D FFT (Range-Doppler Map)
-doppler_axis = linspace(-100, 100, Nd);
-range_axis = linspace(-200, 200, Nr/2) * ((Nr/2) / 400);
-figure('Name', 'Range Doppler Map');
-surf(doppler_axis, range_axis, RDM);
-xlabel('Doppler (m/s)');
 ylabel('Range (m)');
-zlabel('Amplitude (dB)');
-title('Range Doppler Map');
+title('RTI Plot without Clutter Rejection');
 colorbar;
+
+%% RTI Plot with 2-Pulse Canceller (Clutter Rejection)
+% Apply 2-pulse canceller by subtracting each pulse from the previous one
+sif2 = Mix(:, 2:end) - Mix(:, 1:end-1); % 2-pulse canceller
+RTI_clutter_rejected = fft(sif2, Nr, 1);
+RTI_clutter_rejected = abs(RTI_clutter_rejected(1:Nr/2, :)); % Take only positive frequencies
+RTI_clutter_rejected_dB = 10 * log10(RTI_clutter_rejected); % Convert to dB
+
+% Limit RTI to 25 m range
+RTI_clutter_rejected_dB = RTI_clutter_rejected_dB(1:range_idx_limit, :);
+
+% Plot RTI with 2-pulse canceller
+figure('Name', 'RTI with 2-Pulse Canceller (Clutter Rejection)');
+imagesc(time(1:end-1), range_axis, RTI_clutter_rejected_dB, [-80, 0]); % Adjust dB range as needed
+xlabel('Time (s)');
+ylabel('Range (m)');
+title('RTI Plot with 2-Pulse Canceller (Clutter Rejection)');
+colorbar;
+
+%% Additional Optional Plots (Range-Doppler, 1D FFT, etc.) if needed
+% Range-Doppler, 1D FFT, Regular FFT, etc. can be added here if required
