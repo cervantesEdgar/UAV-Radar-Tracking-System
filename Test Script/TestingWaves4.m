@@ -68,5 +68,4 @@ ylabel('Range (m)');
 title('RTI Plot with 2-Pulse Canceller (Clutter Rejection)');
 colorbar;
 
-%% Additional Optional Plots (Range-Doppler, 1D FFT, etc.) if needed
-% Range-Doppler, 1D FFT, Regular FFT, etc. can be added here if required
+%% Additional Optio
