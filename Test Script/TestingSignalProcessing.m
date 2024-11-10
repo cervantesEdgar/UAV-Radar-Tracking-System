@@ -21,7 +21,7 @@ c = 3e8;
 % define the target's initial position and velocity. Note : Velocity
 % remains contant
 %  initial range:max value of 200m and velocity: [-70 to + 70 m/s]
-target_range = 3;
+target_range = 6;
 target_velocity = 0; 
  
 %% FMCW Waveform Generation
@@ -112,7 +112,7 @@ grid on;
 axis ([0 200 0 0.5]);
 xlabel('range');
 %ylabel('FFT output');
-title('Range Plot');
+%title('Range Plot');
 
 
 
@@ -149,7 +149,7 @@ figure,surf(doppler_axis,range_axis,RDM);
 xlabel('doppler');
 ylabel('range');
 zlabel('RDM');
-title('Range Doppler Map');
+%title('Range Doppler Map');
 
 
 %% CFAR implementation
