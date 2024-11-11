@@ -70,7 +70,7 @@ plot(sig_fft1, "LineWidth", 2);
 grid on;
 axis([0 200 0 0.5]);
 xlabel('Range (m)');
-title('Range Plot');
+%title('Range Plot');
 
 %% RANGE DOPPLER RESPONSE
 Mix = reshape(Mix, [Nr, Nd]);
@@ -85,7 +85,7 @@ figure, surf(doppler_axis, range_axis, RDM);
 xlabel('Doppler (m/s)');
 ylabel('Range (m)');
 zlabel('Amplitude (dB)');
-title('Range Doppler Map with Fan Simulation');
+%title('Range Doppler Map with Fan Simulation');
 
 %% CFAR Implementation
 Tr = 8;
@@ -120,4 +120,4 @@ RDM(RDM ~= 0 & RDM ~= 1) = 0;
 figure('Name', 'CFAR');
 surf(doppler_axis, range_axis, RDM);
 colorbar;
-title('CFAR with Fan Blades Detection');
+%title('CFAR with Fan Blades Detection');

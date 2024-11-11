@@ -1,6 +1,8 @@
-%% Radar Specifications 
+% MATLAB script to simulate a wave with moving targets and visualize the waterfall plot and wavelet plot
+
+% Radar Specifications 
 clear;
-close;
+close all;
 clc;
 %%%%%%%%%%%%%%%%%%%%%%%%%%%
 % Frequency of operation = 77GHz
@@ -103,7 +105,6 @@ grid on;
 axis ([0 200 0 0.5]);
 xlabel('Range');
 ylabel('FFT output');
-title('Range Plot');
 
 %% RANGE DOPPLER RESPONSE
 
@@ -121,21 +122,40 @@ RDM = 10*log10(RDM);
 % Use the surf function to plot the output of 2DFFT
 doppler_axis = linspace(-100,100,Nd);
 range_axis = linspace(-200,200,Nr/2)*((Nr/2)/400);
-figure,surf(doppler_axis,range_axis,RDM);
+figure('Name', 'Range Doppler Map');
+surf(doppler_axis,range_axis,RDM,'EdgeColor','none');
 xlabel('Doppler');
 ylabel('Range');
 zlabel('RDM');
-title('Range Doppler Map');
-
-% *%TODO* :
-%display the CFAR output using the Surf function like we did for Range
-%Doppler Response output.
-
-% CFAR Output Plot (New Plot for CFAR results)
-figure('Name', 'CFAR Detection Output');
-surf(doppler_axis,range_axis,RDM);  % Display the thresholded RDM after CFAR
 colorbar;
-xlabel('doppler');
-ylabel('range');
-zlabel('Normalized Amplitude');
-title('CFAR Output');
+
+%% WATERFALL PLOT
+
+% Waterfall Plot to Visualize Targets
+figure('Name', 'Waterfall Plot');
+waterfall(doppler_axis, range_axis, RDM);
+xlabel('Doppler (m/s)');
+ylabel('Range (m)');
+zlabel('Amplitude (dB)');
+grid on;
+colorbar;
+
+% Add a figure caption for the Waterfall plot
+disp('Waterfall plot to visualize the range and Doppler characteristics of targets.');
+
+%% WAVELET PLOT
+
+% Wavelet Transform to visualize the time-frequency characteristics
+figure('Name', 'Wavelet Plot');
+coefs = cwt(Mix(1:Nr)); % Continuous wavelet transform on one chirp
+fs = 1 / (t(2) - t(1)); % Calculate the sampling frequency
+frequencies = linspace(0, fs/2, size(coefs, 1));
+time_axis = t(1:Nr) * 1e3; % Convert time to milliseconds for better visualization
+surf(time_axis, frequencies, abs(coefs), 'EdgeColor', 'none');
+xlabel('Time (ms)');
+ylabel('Frequency (Hz)');
+zlabel('Magnitude');
+colorbar;
+view(2);
+
+disp('Wavelet plot to visualize the time-frequency characteristics of the beat signal.');

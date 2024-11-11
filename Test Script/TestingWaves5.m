@@ -2,7 +2,7 @@
 close all; clear; clc;
 
 % Specify the filename
-filename = 'Last_big_metalplate_far_FMCW.dat';
+filename = 'fan_FMCW.dat';
 
 % Open the file and check for errors
 fid = fopen(filename, 'r');
@@ -75,5 +75,5 @@ surf(doppler_axis, range_axis, RDM, 'EdgeColor', 'none');
 xlabel('Doppler (m/s)');
 ylabel('Range (m)');
 zlabel('Amplitude (dB)');
-title('Range Doppler Map');
-colorba
+%title('Range Doppler Map');
+colorbar;

@@ -1,60 +1,48 @@
-clear; close all; clc;
+% MATLAB Script to simulate a wave and its waterfall plot, specifically showing a target reflection
+clear,close all,clc
+% Parameters for the wave simulation
+fs = 1000; % Sampling frequency in Hz
+duration = 2; % Duration in seconds
+t = 0:1/fs:duration-1/fs; % Time vector from 0 to 2 seconds
+f0 = 100; % Carrier frequency in Hz
+velocity_target = 20; % Velocity of the target in m/s (affects Doppler shift)
+c = 340; % Speed of sound in air in m/s
+f_doppler = (velocity_target / c) * f0; % Doppler frequency shift
 
-% Radar parameters
-samplingRate = 25e6;  % Sampling rate: 25 MHz
-sweepTime = 1e-3;     % Sweep time: 1 ms
-frequency = 4.4e9;    % Center frequency: 4.4 GHz
-bandwidth = 25e6;     % Bandwidth: 25 MHz
-numSamples = samplingRate * sweepTime; % Total number of samples
+% Generate the original transmitted wave
+transmitted_wave = cos(2 * pi * f0 * t);
 
-% Create a time vector
-t = (0:numSamples-1) / samplingRate;  % Time vector for one sweep
+% Simulate the reflected signal with Doppler shift
+doppler_wave = cos(2 * pi * (f0 + f_doppler) * t);
+delay_samples = round(0.2 * fs); % Delay in samples to simulate target distance
+reflected_wave = [zeros(1, delay_samples), doppler_wave(1:end-delay_samples)];
 
-% Generate a test signal: a chirp (up-sweep)
-testSignal = chirp(t, frequency - bandwidth/2, sweepTime, frequency + bandwidth/2);
+% Add noise to the received signal to simulate realistic conditions
+noise = 0.1 * randn(size(reflected_wave)); % Generate random noise with standard deviation of 0.1
+received_signal = reflected_wave + noise;
 
-% Plot the transmitted signal
-figure('Name', 'Signal Processing');
+% Create a combined received signal including both transmitted and reflected components
+combined_signal = transmitted_wave + received_signal;
 
-% Time-domain plot
-subplot(3, 1, 1);
-plot(t, testSignal);
+% Plot the time domain of the combined signal
+figure;
+plot(t, combined_signal);
 xlabel('Time (s)');
 ylabel('Amplitude');
-title('Transmitted Signal');
 grid on;
 
-% Plot the spectrogram
-subplot(3, 1, 2);
-[S, F, T] = spectrogram(testSignal, 512, 256, 512, samplingRate, 'yaxis');
-F = F / 1e9;  % Convert frequency to GHz
-imagesc(T, F, 10*log10(abs(S)));  % Convert to dB
-axis xy;  % Correct the axis orientation
-colorbar;  % Add color bar
-ylim([min(F), max(F)]);  % Set y-axis limits based on actual frequency range
-title('Spectrogram of the Transmitted Signal');
-ylabel('Frequency (GHz)');
+% Add figure caption
+disp('Fig. 1. Combined transmitted and received signal with target reflection and noise.');
 
-waterfall(F,T,abs(S)'.^2)
-set(gca,XDir="reverse",View=[30 50])
-xlabel("Frequency (Hz)")
-ylabel("Time (s)")
+% Plot the waterfall plot (or spectrogram) to visualize target reflection
+figure;
+window_size = 256; % Size of the window for the spectrogram
+overlap = 200; % Overlap between windows
+nfft = 512; % Number of FFT points
+spectrogram(combined_signal, window_size, overlap, nfft, fs, 'yaxis');
+xlabel('Time (s)');
+ylabel('Frequency (Hz)');
+colorbar;
 
-% Perform the FFT
-fftSignal = fft(testSignal);
-
-% Frequency axis for FFT
-N = length(fftSignal);  % Length of the signal
-freq = (-N/2:N/2-1) * (samplingRate / N) + frequency;  % Shift by center frequency
-
-% Shift the FFT to center zero frequency
-fftShifted = fftshift(fftSignal);
-
-% Create a plot for FFT
-subplot(3, 1, 3);
-plot(freq/1e9, abs(fftShifted));  % Convert frequency to GHz for plotting
-xlim([4.3875 4.4125]);  % Set x-axis limits to GHz
-xlabel('Frequency (GHz)');
-ylabel('Magnitude');
-title('FFT of the Transmitted Signal');
-grid on;
+% Add figure caption for waterfall plot
+disp('Fig. 2. Waterfall plot of the received signal showing the frequency shift due to target reflection.');
