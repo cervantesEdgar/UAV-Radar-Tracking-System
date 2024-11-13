@@ -1,11 +1,11 @@
-% Signal Processing and Plotting Script for FMCW Data with Separate Transmit and Receive Files
+%% Signal Processing and Plotting Script for FMCW Data with Separate Transmit and Receive Files
 
 %% 1. Initialization and Data Loading
 close all; clear; clc;
 
 % Specify the filenames for transmit and receive files
-tx_filename = 'transmit_signal.dat';
-rx_filename = 'receive_signal.dat';
+tx_filename = 'FMCW_20MHz_4us.dat';
+rx_filename = 'metal_plate_in_room_10KHz_FMCW.dat';
 
 % Open the transmit file for reading in binary mode
 fid_tx = fopen(tx_filename, 'r');
@@ -20,10 +20,10 @@ if fid_rx == -1
 end
 
 % Read data as complex IQ samples for both transmit and receive signals
-tx_data = fread(fid_tx, [2, inf], 'float32');
+tx_data = fread(fid_tx, [2, inf], 'float32=>double');
 tx_data = tx_data(1, :) + 1i * tx_data(2, :); % Combine into complex numbers (I + jQ)
 
-rx_data = fread(fid_rx, [2, inf], 'float32');
+rx_data = fread(fid_rx, [2, inf], 'float32=>double');
 rx_data = rx_data(1, :) + 1i * rx_data(2, :); % Combine into complex numbers (I + jQ)
 
 % Close the files
@@ -36,13 +36,32 @@ tx_data = tx_data(1:min_samples);
 rx_data = rx_data(1:min_samples);
 
 % Compute the beat frequency signal by multiplying the receive signal with the conjugate of the transmit signal
-beat_signal = rx_data .* conj(tx_data);
+beat_signal = rx_data .* tx_data;
 
 % Sampling rate and capture duration
-sampling_rate = 1e6; % 1 MHz for 50 kHz bandwidth
+sampling_rate = 25e6; % 25 MHz for the chosen bandwidth
 capture_duration = 0.5; % 500 ms or 0.5 seconds
 num_samples = length(beat_signal);
 time = linspace(0, capture_duration, num_samples);
+
+% Remove the extra 10 kHz component by shifting the signal
+beat_signal = beat_signal .* exp(-1i * 2 * pi * 10e3 * time);
+
+% Plot Transmit Wave in Time Domain
+figure;
+plot(time, real(tx_data), 'b-', 'LineWidth', 1.5);
+title('Transmit Wave in Time Domain');
+xlabel('Time (s)');
+ylabel('Amplitude');
+grid on;
+
+% Plot Receive Wave in Time Domain
+figure;
+plot(time, real(rx_data), 'b-', 'LineWidth', 1.5);
+title('Receive Wave in Time Domain');
+xlabel('Time (s)');
+ylabel('Amplitude');
+grid on;
 
 %% 2. Basic Signal Analysis Plots
 figure('Name', 'Basic Signal Analysis');
@@ -115,7 +134,6 @@ doppler_spectrum = abs(doppler_fft);
 doppler_spectrum_dB = 10*log10(doppler_spectrum);
 doppler_axis = linspace(-sampling_rate / 2, sampling_rate / 2, Nd);
 
-subplot(3,2,1);
 waterfall(doppler_axis, (1:Nr/2) * (sampling_rate / Nr), doppler_spectrum_dB(1:Nr/2, :));
 xlabel('Doppler Frequency (Hz)');
 ylabel('Range (m)');
