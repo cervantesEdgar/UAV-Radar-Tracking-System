@@ -5,7 +5,7 @@ close all; clear; clc;
 
 % Specify the filenames for transmit and receive files
 tx_filename = 'sine.dat';
-rx_filename = 'fan_in_room_modified_sine.dat';
+rx_filename = 'Alexis_running_sine.dat';
 
 % Open the transmit file for reading in binary mode
 fid_tx = fopen(tx_filename, 'r');
@@ -33,14 +33,14 @@ fclose(fid_rx);
 % Sampling rate and capture duration
 sampling_rate = 25e6; % 25 MHz for the chosen bandwidth
 capture_duration = 0.5; % 500 ms or 0.5 seconds
-timeShift = 0.001; %Used to skip beginning of wave
-%Skip initial part of wave based on timeShift
-num_samples_to_skip = floor(timeShift * sampling_rate);
+
+% Skip the first 0.12 seconds of the receiving signal
+num_samples_to_skip = floor(0.12 * sampling_rate);
 rx_data = rx_data(num_samples_to_skip + 1:end);
 tx_data = tx_data(num_samples_to_skip + 1:end);
 
-% Update the 'time' variable to start from timeShift
-time = linspace(timeShift, capture_duration, length(rx_data));
+% Update the 'time' variable to start from 0.12 seconds
+time = linspace(0.12, capture_duration, length(rx_data));
 
 % Ensure the length of the data arrays match
 min_samples = min(length(tx_data), length(rx_data));
@@ -152,5 +152,5 @@ grid on;
 % Continue with other advanced plots as needed, using `beat_signal` instead of `data`
 % RTI Plot, Range-Doppler Plot, etc., will follow similar logic as in the original script.
 
-%sgtitle('Analysis of FMCW Beat Signal');
+sgtitle('Analysis of FMCW Beat Signal');
 

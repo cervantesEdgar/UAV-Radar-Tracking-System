@@ -146,10 +146,9 @@ RDM = 10*log10(RDM) ;
 doppler_axis = linspace(-100,100,Nd);
 range_axis = linspace(-200,200,Nr/2)*((Nr/2)/400);
 figure,surf(doppler_axis,range_axis,RDM);
-xlabel('Doppler (m/s)');
-colorbar;
-ylabel('Range (m)');
-zlabel('Amplitude (dB)');
+xlabel('doppler');
+ylabel('range');
+zlabel('RDM');
 %title('Range Doppler Map');
 
 

@@ -25,10 +25,6 @@ rx_data = rx_data(1:min_samples);
 % Calculate the beat signal
 beat_signal = rx_data .* conj(tx_data);
 
-% Remove DC component using high-pass filter
-[b, a] = butter(1, 0.01, 'high'); % First-order high-pass filter with low cutoff frequency
-beat_signal = filter(b, a, beat_signal);
-
 % Perform FFT to analyze the beat signal
 N = length(beat_signal);
 beat_signal_fft = fft(beat_signal, N);
@@ -37,11 +33,8 @@ f = (0:N/2-1) * (sampling_rate / N);
 
 % Calculate the range for each frequency component
 c = 3e8; % Speed of light (m/s)
+range_resolution = c / (2 * bandwidth);
 ranges = (c * chirp_duration * f) / (2 * bandwidth);
-
-% Limit the range profile to the expected room size
-max_range = 50; % Limit to the expected room size (50 meters)
-valid_indices = ranges <= max_range;
 
 % Plot the beat frequency spectrum
 figure;
@@ -51,20 +44,10 @@ xlabel('Frequency (Hz)');
 ylabel('Amplitude');
 grid on;
 
-% Plot the range profile (limited to expected room size)
+% Plot the range profile
 figure;
-plot(ranges(valid_indices), beat_signal_fft(valid_indices));
-title('Range Profile (Limited to Expected Room Size)');
+plot(ranges, beat_signal_fft);
+title('Range Profile');
 xlabel('Range (m)');
 ylabel('Amplitude');
-grid on;
-
-% Plot Power Spectral Density (PSD) with adjusted parameters
-figure;
-window_length = 2048; % Increased window length for better frequency resolution
-[pxx, f_psd] = pwelch(beat_signal, hamming(window_length), window_length/2, window_length, sampling_rate);
-plot(f_psd, 10*log10(pxx), 'LineWidth', 1.5);
-title('Power Spectral Density (PSD)');
-xlabel('Frequency (Hz)');
-ylabel('Power/Frequency (dB/Hz)');
 grid on;

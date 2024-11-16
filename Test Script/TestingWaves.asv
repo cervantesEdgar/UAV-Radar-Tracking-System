@@ -19,7 +19,7 @@ c = 3e8;
 %% User Defined Range and Velocity of targets
 % Target 1
 target_range1 = 6; 
-target_velocity1 = 0; 
+target_velocity1 = 60; 
 
 % Target 2
 target_range2 = 0;  % Add the second target's initial range
@@ -102,9 +102,9 @@ sig_fft1 = sig_fft1(1:(Nr/2));
 figure('Name','Range from First FFT')
 plot(sig_fft1, "LineWidth",2);
 grid on;
-%axis ([0 200 0 0.5]);
-xlabel('Range (m)');
-ylabel('Amplitude');
+axis ([0 200 0 0.5]);
+xlabel('Range');
+ylabel('FFT output');
 
 %% RANGE DOPPLER RESPONSE
 
